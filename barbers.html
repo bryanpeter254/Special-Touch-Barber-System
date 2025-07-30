@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Barbers - Special Touch Kinyozi</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      padding: 40px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    form input, form button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+    }
+    .remove-btn {
+      background: crimson;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    .success {
+      color: green;
+      text-align: center;
+    }
+    .error {
+      color: red;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Manage Barbers</h2>
+
+    <form action="manage_barbers.php" method="POST">
+      <input type="text" name="barber_name" placeholder="Barber's Name" required>
+      <input type="text" name="commission_rate" placeholder="Commission Rate (e.g. 0.2 for 20%)" required>
+      <input type="text" name="phone" placeholder="Phone Number" required>
+      <button type="submit" name="add_barber">➕ Add Barber</button>
+    </form>
+
+    <!-- Feedback -->
+    <?php
+    if (isset($_GET['success'])) echo "<p class='success'>✔️ " . htmlspecialchars($_GET['success']) . "</p>";
+    if (isset($_GET['error'])) echo "<p class='error'>❌ " . htmlspecialchars($_GET['error']) . "</p>";
+    ?>
+
+    <!-- Barber List -->
+    <h3>Current Barbers</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Commission</th>
+          <th>Phone</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php
+        // Show barbers from DB
+        $conn = new mysqli("localhost", "root", "", "barbershop");
+        $result = $conn->query("SELECT * FROM barbers");
+
+        while ($row = $result->fetch_assoc()) {
+          echo "<tr>
+                  <td>" . htmlspecialchars($row['name']) . "</td>
+                  <td>" . htmlspecialchars($row['commission_rate']) . "</td>
+                  <td>" . htmlspecialchars($row['phone']) . "</td>
+                  <td>
+                    <form action='manage_barbers.php' method='POST' onsubmit='return confirm(\"Are you sure?\");'>
+                      <input type='hidden' name='barber_id' value='" . $row['id'] . "'>
+                      <button type='submit' name='delete_barber' class='remove-btn'>Remove</button>
+                    </form>
+                  </td>
+                </tr>";
+        }
+        $conn->close();
+        ?>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
